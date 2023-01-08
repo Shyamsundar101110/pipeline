@@ -1,5 +1,4 @@
-FROM python:2.8
-
+FROM python:2.7
 # Creating Application Source Code Directory
 RUN mkdir -p /usr/src/app
 
