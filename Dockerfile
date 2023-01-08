@@ -1,14 +1,27 @@
-FROM python:3.8
-ARG ACCESS_KEY_ID
-ARG SECRET_ACCESS_KEY
-RUN pip install pip  --upgrade
-RUN apt-get update && apt-get install -y \
-    python3  \
-    python3 awscli
-RUN aws configure set aws_access_key_id $ACCESS_KEY_ID \
-    && aws configure set aws_secret_access_key $SECRET_ACCESS_KEY \
-    && aws configure set default.region ap-south-1 \
-    && aws configure set default.output json
-COPY ./script.sh .
-RUN chmod 777 script.sh
-CMD ./script.sh
+FROM python:2.7
+
+# Creating Application Source Code Directory
+RUN mkdir -p /usr/src/app
+
+# Setting Home Directory for containers
+WORKDIR /usr/src/app
+
+# Installing python dependencies
+COPY requirements.txt /usr/src/app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copying src code to Container
+COPY . /usr/src/app
+
+# Application Environment variables
+#ENV APP_ENV development
+ENV PORT 8080
+
+# Exposing Ports
+EXPOSE $PORT
+
+# Setting Persistent data
+VOLUME ["/app-data"]
+
+# Running Python Application
+CMD gunicorn -b :$PORT -c gunicorn.conf.py main:app
